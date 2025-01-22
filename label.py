@@ -10,7 +10,7 @@ class ImageRotatorApp:
         self.config = {}
         
         self.output_path = output_path
-        self.labels_path=labels_path
+        self.labels_path = labels_path
         self.master = master
         self.title = "双图旋转验证码标注系统"
         self.master.title(self.title)
@@ -29,6 +29,11 @@ class ImageRotatorApp:
         # Load images
         self.image1 = Image.open(f"{labels_path}/bg_{self.image_index}.png")
         self.image2 = Image.open(f"{labels_path}/center_{self.image_index}.png")
+
+        scale = 1.0
+        width, height = self.image2.size
+        self.image2 = self.image2.resize((int(width * scale), int(height * scale)), Image.LANCZOS)
+
         self.image1_tk = ImageTk.PhotoImage(self.image1)
         self.image2_tk = ImageTk.PhotoImage(self.image2)
 
@@ -105,7 +110,7 @@ class ImageRotatorApp:
         image = Image.open(image_path)
         
         # 旋转图像
-        rotated_image = image.rotate(-degrees_to_rotate)
+        rotated_image = image.rotate(-degrees_to_rotate, expand=False, resample=Image.BICUBIC)
     
         # 保存旋转后的图像
         rotated_image.save(output_path)
@@ -118,6 +123,7 @@ class ImageRotatorApp:
         with open(f"{self.labels_path}/config.json", "w") as f:
             f.write(json.dumps(self.config))
         self.save_rotate_image(f"{self.labels_path}/center_{self.image_index}.png", angle, f"{self.output_path}/center_{self.image_index}.png")
+
     def next_group(self):
         # Change images
         self.commit_angle()
@@ -142,8 +148,8 @@ class ImageRotatorApp:
         self.angle_entry.insert(0, str(self.angle))
 
 def main():
-    labels_path = "xhs_captcha_imgs" # 需要标注的图片路径
-    output_path = "temp"    # 输出旋转到正确角度的验证码图片
+    labels_path = "input_captcha_imgs"  # 需要标注的图片路径
+    output_path = "output_captcha_imgs"    # 输出旋转到正确角度的验证码图片
     
     root = tk.Tk()
     app = ImageRotatorApp(root, labels_path, output_path)
